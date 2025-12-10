@@ -9,7 +9,7 @@ function Books() {
   const [books, setBooks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [newBook, setNewBook] = useState({ title: '', author: '', isbn: '', publishedDate: '' })
+  const [newBook, setNewBook] = useState({ title: '', author: '', isbn: '', publishedYear: '' })
 
   useEffect(() => {
     fetchBooks()
@@ -46,9 +46,9 @@ function Books() {
         title: newBook.title,
         author: newBook.author,
         isbn: newBook.isbn || null,
-        publishedDate: newBook.publishedDate || null
+        publishedYear: newBook.publishedYear || null
       }, config)
-      setNewBook({ title: '', author: '', isbn: '', publishedDate: '' })
+      setNewBook({ title: '', author: '', isbn: '', publishedYear: '' })
       fetchBooks()
     } catch (err) {
       setError('Failed to create book: ' + err.message)
@@ -97,10 +97,12 @@ function Books() {
           onChange={(e) => setNewBook({ ...newBook, isbn: e.target.value })}
         />
         <input
-          type="date"
-          placeholder="Published Date (optional)"
-          value={newBook.publishedDate}
-          onChange={(e) => setNewBook({ ...newBook, publishedDate: e.target.value })}
+          type="number"
+          placeholder="Published Year (optional)"
+          min="1000"
+          max="2100"
+          value={newBook.publishedYear}
+          onChange={(e) => setNewBook({ ...newBook, publishedYear: e.target.value })}
         />
         <button type="submit">Add Book</button>
       </form>
@@ -128,7 +130,7 @@ function Books() {
                   <td>{book.title}</td>
                   <td>{book.author}</td>
                   <td>{book.isbn || '-'}</td>
-                  <td>{book.publishedDate || '-'}</td>
+                  <td>{book.publishedYear || '-'}</td>
                   <td>
                     <button
                       onClick={() => handleDelete(book.id)}
