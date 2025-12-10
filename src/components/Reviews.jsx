@@ -1,31 +1,43 @@
 import { useState, useEffect } from 'react'
+import { useAuth } from '@clerk/clerk-react'
 import axios from 'axios'
 
 const API_URL = 'https://review-service-x2si.onrender.com'
 const BOOK_API_URL = 'https://book-service-innn.onrender.com'
 
 function Reviews() {
+  const { getToken } = useAuth()
   const [reviews, setReviews] = useState([])
   const [books, setBooks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [newReview, setNewReview] = useState({ 
-    bookId: '', 
-    reviewerName: '', 
-    rating: 5, 
-    comment: '' 
+  const [newReview, setNewReview] = useState({
+    bookId: '',
+    reviewerName: '',
+    rating: 5,
+    comment: ''
   })
 
   useEffect(() => {
     fetchData()
   }, [])
 
+  const getAuthHeaders = async () => {
+    const token = await getToken()
+    return {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }
+  }
+
   const fetchData = async () => {
     try {
       setLoading(true)
+      const config = await getAuthHeaders()
       const [reviewsRes, booksRes] = await Promise.all([
-        axios.get(`${API_URL}/reviews`),
-        axios.get(`${BOOK_API_URL}/books`)
+        axios.get(`${API_URL}/reviews`, config),
+        axios.get(`${BOOK_API_URL}/books`, config)
       ])
       setReviews(reviewsRes.data)
       setBooks(booksRes.data)
@@ -40,12 +52,13 @@ function Reviews() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
+      const config = await getAuthHeaders()
       await axios.post(`${API_URL}/reviews`, {
         bookId: parseInt(newReview.bookId),
         reviewerName: newReview.reviewerName,
         rating: parseInt(newReview.rating),
         comment: newReview.comment
-      })
+      }, config)
       setNewReview({ bookId: '', reviewerName: '', rating: 5, comment: '' })
       fetchData()
     } catch (err) {
@@ -56,7 +69,8 @@ function Reviews() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this review?')) return
     try {
-      await axios.delete(`${API_URL}/reviews/${id}`)
+      const config = await getAuthHeaders()
+      await axios.delete(`${API_URL}/reviews/${id}`, config)
       fetchData()
     } catch (err) {
       setError('Failed to delete review: ' + err.message)
@@ -73,12 +87,12 @@ function Reviews() {
   return (
     <div className="reviews-page">
       <h2>Reviews</h2>
-      
+
       {error && <div className="error">{error}</div>}
 
       <form onSubmit={handleSubmit} className="review-form">
         <h3>Add New Review</h3>
-        
+
         <select
           value={newReview.bookId}
           onChange={(e) => setNewReview({ ...newReview, bookId: e.target.value })}
@@ -136,7 +150,7 @@ function Reviews() {
                 </div>
                 <p className="reviewer">— {review.reviewerName}</p>
                 <p className="comment">{review.comment}</p>
-                <button 
+                <button
                   onClick={() => handleDelete(review.id)}
                   className="delete-btn"
                 >

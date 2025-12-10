@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
+import { useAuth } from '@clerk/clerk-react'
 import axios from 'axios'
 
 const API_URL = 'https://book-service-innn.onrender.com'
 
 function Books() {
+  const { getToken } = useAuth()
   const [books, setBooks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -13,10 +15,20 @@ function Books() {
     fetchBooks()
   }, [])
 
+  const getAuthHeaders = async () => {
+    const token = await getToken()
+    return {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }
+  }
+
   const fetchBooks = async () => {
     try {
       setLoading(true)
-      const response = await axios.get(`${API_URL}/books`)
+      const config = await getAuthHeaders()
+      const response = await axios.get(`${API_URL}/books`, config)
       setBooks(response.data)
       setError(null)
     } catch (err) {
@@ -29,12 +41,13 @@ function Books() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
+      const config = await getAuthHeaders()
       await axios.post(`${API_URL}/books`, {
         title: newBook.title,
         author: newBook.author,
         isbn: newBook.isbn || null,
         publishedDate: newBook.publishedDate || null
-      })
+      }, config)
       setNewBook({ title: '', author: '', isbn: '', publishedDate: '' })
       fetchBooks()
     } catch (err) {
@@ -45,7 +58,8 @@ function Books() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this book?')) return
     try {
-      await axios.delete(`${API_URL}/books/${id}`)
+      const config = await getAuthHeaders()
+      await axios.delete(`${API_URL}/books/${id}`, config)
       fetchBooks()
     } catch (err) {
       setError('Failed to delete book: ' + err.message)
@@ -57,7 +71,7 @@ function Books() {
   return (
     <div className="books-page">
       <h2>Books</h2>
-      
+
       {error && <div className="error">{error}</div>}
 
       <form onSubmit={handleSubmit} className="book-form">
@@ -116,7 +130,7 @@ function Books() {
                   <td>{book.isbn || '-'}</td>
                   <td>{book.publishedDate || '-'}</td>
                   <td>
-                    <button 
+                    <button
                       onClick={() => handleDelete(book.id)}
                       className="delete-btn"
                     >

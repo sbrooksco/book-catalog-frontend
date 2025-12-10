@@ -1,4 +1,4 @@
-i* {
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -21,9 +21,60 @@ header {
   margin-bottom: 2rem;
 }
 
-header h1 {
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1rem;
+}
+
+header h1 {
+  margin: 0;
   color: #2563eb;
+}
+
+.auth-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.sign-in-btn, .sign-in-btn-large {
+  padding: 0.5rem 1.5rem;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.sign-in-btn:hover, .sign-in-btn-large:hover {
+  background: #1d4ed8;
+}
+
+.sign-in-btn-large {
+  padding: 0.75rem 2rem;
+  font-size: 1.1rem;
+}
+
+.welcome {
+  text-align: center;
+  padding: 4rem 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.welcome h2 {
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.welcome p {
+  color: #6b7280;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
 }
 
 nav {
