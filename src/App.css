@@ -14,6 +14,7 @@ body {
   min-height: 100vh;
 }
 
+/* Header */
 header {
   background: white;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -29,41 +30,52 @@ header {
 }
 
 header h1 {
-  margin: 0;
   color: #2563eb;
+  font-size: 1.8rem;
 }
 
 .auth-section {
   display: flex;
   align-items: center;
-  gap: 1rem;
 }
 
-.sign-in-btn, .sign-in-btn-large {
+/* Navigation */
+nav {
+  display: flex;
+  gap: 1rem;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+}
+
+nav .nav-link {
   padding: 0.5rem 1.5rem;
-  background: #2563eb;
-  color: white;
-  border: none;
+  border: 2px solid #2563eb;
+  background: white;
+  color: #2563eb;
   border-radius: 6px;
   cursor: pointer;
   font-size: 1rem;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
 }
 
-.sign-in-btn:hover, .sign-in-btn-large:hover {
-  background: #1d4ed8;
+nav .nav-link:hover {
+  background: #2563eb;
+  color: white;
 }
 
-.sign-in-btn-large {
-  padding: 0.75rem 2rem;
-  font-size: 1.1rem;
+/* Main content */
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem 2rem;
 }
 
+/* Welcome screen */
 .welcome {
   text-align: center;
   padding: 4rem 2rem;
-  max-width: 600px;
-  margin: 0 auto;
 }
 
 .welcome h2 {
@@ -73,47 +85,36 @@ header h1 {
 
 .welcome p {
   color: #6b7280;
-  font-size: 1.1rem;
   margin-bottom: 2rem;
 }
 
-nav {
-  display: flex;
-  gap: 1rem;
-}
-
-nav button {
-  padding: 0.5rem 1.5rem;
-  border: 2px solid #e5e7eb;
-  background: white;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.2s;
-}
-
-nav button:hover {
-  border-color: #2563eb;
-  color: #2563eb;
-}
-
-nav button.active {
+.sign-in-btn,
+.sign-in-btn-large {
   background: #2563eb;
   color: white;
-  border-color: #2563eb;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
-main {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem 2rem;
+.sign-in-btn-large {
+  padding: 1rem 3rem;
+  font-size: 1.1rem;
 }
 
+.sign-in-btn:hover,
+.sign-in-btn-large:hover {
+  background: #1d4ed8;
+}
+
+/* Loading and error states */
 .loading {
   text-align: center;
-  padding: 3rem;
-  font-size: 1.2rem;
-  color: #666;
+  padding: 2rem;
+  color: #6b7280;
 }
 
 .error {
@@ -125,8 +126,17 @@ main {
   margin-bottom: 1rem;
 }
 
-/* Forms */
-.book-form, .review-form {
+.success {
+  background: #efe;
+  border: 1px solid #cfc;
+  color: #3a3;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+/* Search form */
+.search-form {
   background: white;
   padding: 2rem;
   border-radius: 8px;
@@ -134,48 +144,72 @@ main {
   margin-bottom: 2rem;
 }
 
-.book-form h3, .review-form h3 {
+.search-inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
   margin-bottom: 1rem;
-  color: #2563eb;
 }
 
-.book-form input,
-.review-form input,
-.review-form select,
-.review-form textarea {
+.search-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Forms */
+.book-form,
+.review-form {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+input[type="text"],
+input[type="number"],
+textarea,
+select {
   width: 100%;
   padding: 0.75rem;
-  margin-bottom: 1rem;
   border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 1rem;
   font-family: inherit;
 }
 
-.book-form input:focus,
-.review-form input:focus,
-.review-form select:focus,
-.review-form textarea:focus {
+input:focus,
+textarea:focus,
+select:focus {
   outline: none;
   border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-.rating-input {
-  margin-bottom: 1rem;
+textarea {
+  resize: vertical;
+  min-height: 100px;
 }
 
-.rating-input label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
-.rating-input input[type="range"] {
+input[type="range"] {
   width: 100%;
-  margin-bottom: 0;
+  margin-top: 0.5rem;
 }
 
-button[type="submit"] {
+/* Buttons */
+button[type="submit"],
+.submit-btn {
   background: #2563eb;
   color: white;
   border: none;
@@ -186,8 +220,31 @@ button[type="submit"] {
   transition: background 0.2s;
 }
 
-button[type="submit"]:hover {
+button[type="submit"]:hover,
+.submit-btn:hover {
   background: #1d4ed8;
+}
+
+button[type="submit"]:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.cancel-btn,
+.clear-btn {
+  background: #6b7280;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cancel-btn:hover,
+.clear-btn:hover {
+  background: #4b5563;
 }
 
 .delete-btn {
@@ -205,15 +262,64 @@ button[type="submit"]:hover {
   background: #b91c1c;
 }
 
-/* Lists */
-.books-list, .reviews-list {
+.delete-btn-small {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: background 0.2s;
+}
+
+.delete-btn-small:hover {
+  background: #b91c1c;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.back-btn {
+  background: #f3f4f6;
+  color: #374151;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  transition: background 0.2s;
+}
+
+.back-btn:hover {
+  background: #e5e7eb;
+}
+
+.add-review-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.add-review-btn:hover {
+  background: #1d4ed8;
+}
+
+/* Books list */
+.books-list {
   background: white;
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.books-list h3, .reviews-list h3 {
+.books-list h3 {
   margin-bottom: 1.5rem;
   color: #1f2937;
 }
@@ -244,44 +350,151 @@ tr:hover {
   background: #f9fafb;
 }
 
-/* Review Cards */
-.review-cards {
-  display: grid;
-  gap: 1rem;
+.book-title-link {
+  background: none;
+  border: none;
+  color: #2563eb;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1rem;
+  text-align: left;
 }
 
+.book-title-link:hover {
+  color: #1d4ed8;
+}
+
+/* Book detail page */
+.book-detail-page h2 {
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.book-info {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+
+.book-info .author {
+  color: #6b7280;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.book-info .isbn,
+.book-info .year {
+  color: #9ca3af;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.rating-summary {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.avg-rating {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.stars {
+  font-size: 1.5rem;
+}
+
+.review-count {
+  color: #6b7280;
+}
+
+/* Reviews section */
+.reviews-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.reviews-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.reviews-header h3 {
+  color: #1f2937;
+}
+
+.reviews-list {
+  margin-top: 1.5rem;
+}
+
+.no-reviews {
+  text-align: center;
+  color: #9ca3af;
+  padding: 2rem;
+}
+
+/* Review cards */
 .review-card {
   background: #f9fafb;
   padding: 1.5rem;
   border-radius: 8px;
   border: 1px solid #e5e7eb;
+  margin-bottom: 1rem;
+}
+
+.review-card:last-child {
+  margin-bottom: 0;
 }
 
 .review-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
 }
 
-.review-header h4 {
+.reviewer {
+  font-weight: 600;
   color: #1f2937;
-  font-size: 1.1rem;
+  margin-right: 0.75rem;
 }
 
 .rating {
   color: #fbbf24;
-  font-size: 1.2rem;
-}
-
-.reviewer {
-  color: #6b7280;
-  font-style: italic;
-  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
 }
 
 .comment {
   color: #374151;
   line-height: 1.6;
-  margin-bottom: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .search-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .search-buttons {
+    flex-direction: column;
+  }
+
+  table {
+    font-size: 0.875rem;
+  }
+
+  th, td {
+    padding: 0.5rem;
+  }
 }
