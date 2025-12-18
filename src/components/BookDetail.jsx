@@ -39,15 +39,24 @@ function BookDetail() {
       setLoading(true)
       const config = await getAuthHeaders()
 
-      const [bookRes, reviewsRes] = await Promise.all([
-        axios.get(`${BOOK_API_URL}/books/${bookId}`, config),
-        axios.get(`${REVIEW_API_URL}/reviews/book/${bookId}`, config)
-      ])
-
+      // Fetch book first
+      const bookRes = await axios.get(`${BOOK_API_URL}/books/${bookId}`, config)
       setBook(bookRes.data)
-      setReviews(reviewsRes.data)
+      console.log('Book loaded:', bookRes.data)
+
+      // Get all reviews and filter client-side (more reliable for now)
+      const allReviewsRes = await axios.get(`${REVIEW_API_URL}/reviews`, config)
+      console.log('All reviews:', allReviewsRes.data)
+      const filtered = allReviewsRes.data.filter(review => {
+        console.log(`Comparing review.bookId (${review.bookId}, type: ${typeof review.bookId}) with bookId (${bookId}, type: ${typeof bookId})`)
+        return review.bookId === parseInt(bookId)
+      })
+      console.log('Filtered reviews for book', bookId, ':', filtered)
+      setReviews(filtered)
+
       setError(null)
     } catch (err) {
+      console.error('Error loading book/reviews:', err)
       setError('Failed to load book details: ' + err.message)
     } finally {
       setLoading(false)
@@ -58,18 +67,23 @@ function BookDetail() {
     e.preventDefault()
     try {
       const config = await getAuthHeaders()
-      await axios.post(`${REVIEW_API_URL}/reviews`, {
+      const reviewData = {
         bookId: parseInt(bookId),
         reviewerName: newReview.reviewerName,
         rating: parseInt(newReview.rating),
         comment: newReview.comment
-      }, config)
+      }
+
+      console.log('Submitting review:', reviewData)
+      const response = await axios.post(`${REVIEW_API_URL}/reviews`, reviewData, config)
+      console.log('Review created:', response.data)
 
       setNewReview({ reviewerName: '', rating: 5, comment: '' })
       setShowAddReview(false)
       fetchBookAndReviews()
     } catch (err) {
-      setError('Failed to add review: ' + err.message)
+      console.error('Review submission error:', err.response?.data || err.message)
+      setError('Failed to add review: ' + (err.response?.data?.message || err.message))
     }
   }
 
