@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react'
 import SearchBooks from './components/SearchBooks'
 import AddBook from './components/AddBook'
+import EditBook from './components/EditBook'
 import BookDetail from './components/BookDetail'
 import './App.css'
 
@@ -24,36 +25,25 @@ function App() {
             </div>
           </div>
 
-          <SignedIn>
-            <nav>
-              <Link to="/" className="nav-link">
-                Search Books
-              </Link>
+          <nav>
+            <Link to="/" className="nav-link">
+              Search Books
+            </Link>
+            <SignedIn>
               <Link to="/add-book" className="nav-link">
                 Add Book
               </Link>
-            </nav>
-          </SignedIn>
+            </SignedIn>
+          </nav>
         </header>
 
         <main>
-          <SignedOut>
-            <div className="welcome">
-              <h2>Welcome to Book Catalog</h2>
-              <p>Please sign in to view and manage books and reviews.</p>
-              <SignInButton mode="modal">
-                <button className="sign-in-btn-large">Sign In to Get Started</button>
-              </SignInButton>
-            </div>
-          </SignedOut>
-
-          <SignedIn>
-            <Routes>
-              <Route path="/" element={<SearchBooks />} />
-              <Route path="/add-book" element={<AddBook />} />
-              <Route path="/book/:bookId" element={<BookDetail />} />
-            </Routes>
-          </SignedIn>
+          <Routes>
+            <Route path="/" element={<SearchBooks />} />
+            <Route path="/add-book" element={<AddBook />} />
+            <Route path="/edit-book/:bookId" element={<EditBook />} />
+            <Route path="/book/:bookId" element={<BookDetail />} />
+          </Routes>
         </main>
       </div>
     </Router>

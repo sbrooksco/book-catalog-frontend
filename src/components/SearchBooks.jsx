@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
-import { useAuth } from '@clerk/clerk-react'
+import { useAuth, useUser } from '@clerk/clerk-react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
 const API_URL = 'https://book-service-innn.onrender.com'
 
 function SearchBooks() {
-  const { getToken } = useAuth()
+  const { getToken, isSignedIn } = useAuth()
+  const { user } = useUser()
   const navigate = useNavigate()
   const [books, setBooks] = useState([])
   const [loading, setLoading] = useState(false)
@@ -17,12 +18,16 @@ function SearchBooks() {
     year: ''
   })
 
+  // Check if current user is admin
+  const isAdmin = user?.publicMetadata?.role === 'admin'
+
   useEffect(() => {
     // Load all books initially
     searchBooks()
   }, [])
 
   const getAuthHeaders = async () => {
+    if (!isSignedIn) return {}
     const token = await getToken()
     return {
       headers: {
@@ -73,6 +78,10 @@ function SearchBooks() {
     } catch (err) {
       setError('Failed to delete book: ' + err.message)
     }
+  }
+
+  const handleEdit = (bookId) => {
+    navigate(`/edit-book/${bookId}`)
   }
 
   return (
@@ -129,7 +138,7 @@ function SearchBooks() {
                 <th>Author</th>
                 <th>ISBN</th>
                 <th>Published</th>
-                <th>Actions</th>
+                {isAdmin && <th>Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -146,14 +155,24 @@ function SearchBooks() {
                   <td>{book.author}</td>
                   <td>{book.isbn || '-'}</td>
                   <td>{book.publishedYear || '-'}</td>
-                  <td>
-                    <button
-                      onClick={() => handleDelete(book.id)}
-                      className="delete-btn"
-                    >
-                      Delete
-                    </button>
-                  </td>
+                  {isAdmin && (
+                    <td>
+                      <div className="action-buttons">
+                        <button
+                          onClick={() => handleEdit(book.id)}
+                          className="edit-btn"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(book.id)}
+                          className="delete-btn"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
