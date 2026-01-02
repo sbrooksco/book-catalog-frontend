@@ -37,6 +37,7 @@ function BookDetail() {
   const fetchBookAndReviews = async () => {
     try {
       setLoading(true)
+      setError(null)
       const config = await getAuthHeaders()
 
       // Fetch book first
@@ -53,8 +54,6 @@ function BookDetail() {
       })
       console.log('Filtered reviews for book', bookId, ':', filtered)
       setReviews(filtered)
-
-      setError(null)
     } catch (err) {
       console.error('Error loading book/reviews:', err)
       setError('Failed to load book details: ' + err.message)
@@ -66,6 +65,7 @@ function BookDetail() {
   const handleSubmitReview = async (e) => {
     e.preventDefault()
     try {
+      setError(null)
       const config = await getAuthHeaders()
       const reviewData = {
         bookId: parseInt(bookId),
@@ -80,6 +80,18 @@ function BookDetail() {
 
       setNewReview({ reviewerName: '', rating: 5, comment: '' })
       setShowAddReview(false)
+
+      // Show success message
+      const successMsg = document.createElement('div')
+      successMsg.className = 'success'
+      successMsg.textContent = 'Review added successfully!'
+      successMsg.style.position = 'fixed'
+      successMsg.style.top = '20px'
+      successMsg.style.right = '20px'
+      successMsg.style.zIndex = '1000'
+      document.body.appendChild(successMsg)
+      setTimeout(() => successMsg.remove(), 3000)
+
       fetchBookAndReviews()
     } catch (err) {
       console.error('Review submission error:', err.response?.data || err.message)
@@ -92,7 +104,20 @@ function BookDetail() {
     try {
       const config = await getAuthHeaders()
       await axios.delete(`${REVIEW_API_URL}/reviews/${reviewId}`, config)
-      fetchBookAndReviews()
+
+      // Remove from list immediately
+      setReviews(reviews.filter(r => r.id !== reviewId))
+
+      // Show success message
+      const successMsg = document.createElement('div')
+      successMsg.className = 'success'
+      successMsg.textContent = 'Review deleted successfully'
+      successMsg.style.position = 'fixed'
+      successMsg.style.top = '20px'
+      successMsg.style.right = '20px'
+      successMsg.style.zIndex = '1000'
+      document.body.appendChild(successMsg)
+      setTimeout(() => successMsg.remove(), 3000)
     } catch (err) {
       setError('Failed to delete review: ' + err.message)
     }
@@ -104,13 +129,27 @@ function BookDetail() {
     return (sum / reviews.length).toFixed(1)
   }
 
-  if (loading) return <div className="loading">Loading...</div>
+  const renderStars = (rating) => {
+    const fullStars = Math.floor(rating)
+    const hasHalfStar = rating % 1 >= 0.5
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0)
+
+    return (
+      <>
+        {'⭐'.repeat(fullStars)}
+        {hasHalfStar && '✨'}
+        {'☆'.repeat(emptyStars)}
+      </>
+    )
+  }
+
+  if (loading) return <div className="loading">Loading book details...</div>
   if (!book) return <div className="error">Book not found</div>
 
   return (
     <div className="book-detail-page">
       <button onClick={() => navigate('/')} className="back-btn">
-        ← Back to Search
+        ← Back to Catalog
       </button>
 
       {error && <div className="error">{error}</div>}
@@ -118,34 +157,52 @@ function BookDetail() {
       <div className="book-info">
         <h2>{book.title}</h2>
         <p className="author">by {book.author}</p>
-        {book.isbn && <p className="isbn">ISBN: {book.isbn}</p>}
-        {book.publishedYear && <p className="year">Published: {book.publishedYear}</p>}
+
+        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+          {book.isbn && (
+            <div>
+              <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', fontWeight: '600' }}>ISBN</span>
+              <p className="isbn" style={{ marginTop: '0.25rem' }}>{book.isbn}</p>
+            </div>
+          )}
+          {book.publishedYear && (
+            <div>
+              <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', fontWeight: '600' }}>Published</span>
+              <p className="year" style={{ marginTop: '0.25rem' }}>{book.publishedYear}</p>
+            </div>
+          )}
+        </div>
 
         {reviews.length > 0 && (
           <div className="rating-summary">
-            <span className="avg-rating">{calculateAverageRating()}</span>
-            <span className="stars">{'⭐'.repeat(Math.round(calculateAverageRating()))}</span>
-            <span className="review-count">({reviews.length} review{reviews.length !== 1 ? 's' : ''})</span>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+              <span className="avg-rating">{calculateAverageRating()}</span>
+              <span style={{ fontSize: '1rem', color: 'var(--color-text-muted)' }}>out of 5</span>
+            </div>
+            <span className="stars">{renderStars(parseFloat(calculateAverageRating()))}</span>
+            <span className="review-count">
+              Based on {reviews.length} review{reviews.length !== 1 ? 's' : ''}
+            </span>
           </div>
         )}
       </div>
 
       <div className="reviews-section">
         <div className="reviews-header">
-          <h3>Reviews</h3>
+          <h3>Reviews {reviews.length > 0 && `(${reviews.length})`}</h3>
           {!showAddReview && (
             <button
               onClick={() => setShowAddReview(true)}
               className="add-review-btn"
             >
-              Add Review
+              ✍️ Write a Review
             </button>
           )}
         </div>
 
         {showAddReview && (
           <form onSubmit={handleSubmitReview} className="review-form">
-            <h4>Write a Review</h4>
+            <h4>Share Your Thoughts</h4>
 
             <div className="form-group">
               <label htmlFor="reviewerName">Your Name *</label>
@@ -160,7 +217,7 @@ function BookDetail() {
             </div>
 
             <div className="form-group">
-              <label>Rating: {newReview.rating} ⭐</label>
+              <label>Rating: {newReview.rating} {renderStars(newReview.rating)}</label>
               <input
                 type="range"
                 min="1"
@@ -168,27 +225,40 @@ function BookDetail() {
                 value={newReview.rating}
                 onChange={(e) => setNewReview({ ...newReview, rating: e.target.value })}
               />
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginTop: '0.5rem',
+                fontSize: '0.875rem',
+                color: 'var(--color-text-muted)'
+              }}>
+                <span>Poor</span>
+                <span>Excellent</span>
+              </div>
             </div>
 
             <div className="form-group">
               <label htmlFor="comment">Your Review *</label>
               <textarea
                 id="comment"
-                placeholder="Write your review..."
+                placeholder="What did you think about this book? Share your experience..."
                 value={newReview.comment}
                 onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
                 required
-                rows="4"
+                rows="5"
               />
             </div>
 
             <div className="form-actions">
               <button type="submit" className="submit-btn">
-                Submit Review
+                📝 Submit Review
               </button>
               <button
                 type="button"
-                onClick={() => setShowAddReview(false)}
+                onClick={() => {
+                  setShowAddReview(false)
+                  setNewReview({ reviewerName: '', rating: 5, comment: '' })
+                }}
                 className="cancel-btn"
               >
                 Cancel
@@ -199,25 +269,36 @@ function BookDetail() {
 
         <div className="reviews-list">
           {reviews.length === 0 ? (
-            <p className="no-reviews">No reviews yet. Be the first to review this book!</p>
+            <div className="no-reviews">
+              <p style={{ fontSize: '1.125rem', marginBottom: '0.5rem' }}>No reviews yet</p>
+              <p style={{ fontSize: '0.9375rem' }}>Be the first to share your thoughts about this book!</p>
+            </div>
           ) : (
-            reviews.map((review) => (
-              <div key={review.id} className="review-card">
-                <div className="review-header">
-                  <div>
-                    <span className="reviewer">{review.reviewerName}</span>
-                    <span className="rating">{'⭐'.repeat(review.rating)}</span>
+            reviews
+              .sort((a, b) => b.id - a.id) // Show newest first
+              .map((review) => (
+                <div key={review.id} className="review-card">
+                  <div className="review-header">
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
+                        <span className="reviewer">{review.reviewerName}</span>
+                        <span className="rating">{renderStars(review.rating)}</span>
+                      </div>
+                      <div style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>
+                        {review.rating} out of 5 stars
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteReview(review.id)}
+                      className="delete-btn-small"
+                      title="Delete review"
+                    >
+                      🗑️
+                    </button>
                   </div>
-                  <button
-                    onClick={() => handleDeleteReview(review.id)}
-                    className="delete-btn-small"
-                  >
-                    Delete
-                  </button>
+                  <p className="comment">{review.comment}</p>
                 </div>
-                <p className="comment">{review.comment}</p>
-              </div>
-            ))
+              ))
           )}
         </div>
       </div>

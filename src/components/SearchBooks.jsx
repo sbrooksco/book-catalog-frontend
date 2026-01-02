@@ -11,6 +11,7 @@ function SearchBooks() {
   const navigate = useNavigate()
   const [books, setBooks] = useState([])
   const [loading, setLoading] = useState(false)
+  const [initialLoad, setInitialLoad] = useState(true)
   const [error, setError] = useState(null)
   const [searchParams, setSearchParams] = useState({
     title: '',
@@ -41,6 +42,7 @@ function SearchBooks() {
 
     try {
       setLoading(true)
+      setError(null)
       const config = await getAuthHeaders()
 
       // Build query params
@@ -55,11 +57,12 @@ function SearchBooks() {
 
       const response = await axios.get(url, config)
       setBooks(response.data)
-      setError(null)
     } catch (err) {
       setError('Failed to search books: ' + err.message)
+      setBooks([])
     } finally {
       setLoading(false)
+      setInitialLoad(false)
     }
   }
 
@@ -74,7 +77,20 @@ function SearchBooks() {
     try {
       const config = await getAuthHeaders()
       await axios.delete(`${API_URL}/books/${id}`, config)
-      searchBooks()
+
+      // Remove the book from the current list without re-fetching
+      setBooks(books.filter(book => book.id !== id))
+
+      // Show success feedback
+      const successMsg = document.createElement('div')
+      successMsg.className = 'success'
+      successMsg.textContent = 'Book deleted successfully'
+      successMsg.style.position = 'fixed'
+      successMsg.style.top = '20px'
+      successMsg.style.right = '20px'
+      successMsg.style.zIndex = '1000'
+      document.body.appendChild(successMsg)
+      setTimeout(() => successMsg.remove(), 3000)
     } catch (err) {
       setError('Failed to delete book: ' + err.message)
     }
@@ -84,9 +100,11 @@ function SearchBooks() {
     navigate(`/edit-book/${bookId}`)
   }
 
+  const hasSearchParams = searchParams.title || searchParams.author || searchParams.year
+
   return (
     <div className="search-books-page">
-      <h2>Search Books</h2>
+      <h2>📚 Book Catalog</h2>
 
       {error && <div className="error">{error}</div>}
 
@@ -115,22 +133,28 @@ function SearchBooks() {
         </div>
         <div className="search-buttons">
           <button type="submit" disabled={loading}>
-            {loading ? 'Searching...' : 'Search'}
+            {loading ? '🔍 Searching...' : '🔍 Search'}
           </button>
-          <button type="button" onClick={handleClear} className="clear-btn">
-            Clear
-          </button>
+          {hasSearchParams && (
+            <button type="button" onClick={handleClear} className="clear-btn">
+              Clear Filters
+            </button>
+          )}
         </div>
       </form>
 
       <div className="books-list">
         <h3>
-          {books.length === 0
-            ? 'No books found'
-            : `Found ${books.length} book${books.length !== 1 ? 's' : ''}`}
+          {initialLoad && loading ? (
+            'Loading books...'
+          ) : books.length === 0 ? (
+            hasSearchParams ? 'No books match your search' : 'No books found'
+          ) : (
+            `${books.length} book${books.length !== 1 ? 's' : ''} found`
+          )}
         </h3>
 
-        {books.length > 0 && (
+        {!initialLoad && books.length > 0 && (
           <table>
             <thead>
               <tr>
@@ -153,22 +177,24 @@ function SearchBooks() {
                     </button>
                   </td>
                   <td>{book.author}</td>
-                  <td>{book.isbn || '-'}</td>
-                  <td>{book.publishedYear || '-'}</td>
+                  <td>{book.isbn || '—'}</td>
+                  <td>{book.publishedYear || '—'}</td>
                   {isAdmin && (
                     <td>
                       <div className="action-buttons">
                         <button
                           onClick={() => handleEdit(book.id)}
                           className="edit-btn"
+                          title="Edit book"
                         >
-                          Edit
+                          ✏️ Edit
                         </button>
                         <button
                           onClick={() => handleDelete(book.id)}
                           className="delete-btn"
+                          title="Delete book"
                         >
-                          Delete
+                          🗑️ Delete
                         </button>
                       </div>
                     </td>
